@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Metadata Editor</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Image Metadata Editor</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <input type="file" name="image" required>
+        <button type="submit">Upload and Extract Metadata</button>
+    </form>
+
+    <div id="loading" style="display:none;">
+        Procesando... <img src="{{ url_for('static', filename='images/loading.gif') }}">
+    </div>
+
+    {% if error_message %}
+        <div class="alert alert-danger">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    {% if metadata %}
+        <h2>Extracted Metadata</h2>
+        <ul>
+            {% for key, value in metadata.items() %}
+                <li><strong>{{ key }}:</strong> {{ value }}</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Original Image</h2>
+        <img src="{{ image_path }}" alt="Original Image">
+
+        <h2>Edited Image</h2>
+        <img src="{{ edited_image_path }}" alt="Edited Image">
+
+        {% if edited_image_path %}
+            <a href="{{ url_for('download', filename=edited_image_path.split('/')[-1]) }}" download="{{ edited_image_path.split('/')[-1] }}">Download Edited Image (Without Metadata)</a>
+        {% else %}
+            <a href="{{ url_for('download', filename=image_path.split('/')[-1]) }}" download="{{ image_path.split('/')[-1] }}">Download Original Image</a>
+        {% endif %}
+    {% endif %}
+
+    <script>
+        function validateForm() {
+            var fileInput = document.querySelector('input[type=file]');
+            if (fileInput.files.length === 0) {
+                alert('Por favor, seleccione un archivo.');
+                return false;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            return true;
+        }
+    </script>
+
+</body>
+</html>
